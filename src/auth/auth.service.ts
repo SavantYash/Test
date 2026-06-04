@@ -14,6 +14,14 @@ export class AuthService {
 
     async register(dto: { email: string, password: string }) {
         try {
+            const existingUser = await this.prisma.user.findUnique({
+                where: { email: dto.email },
+            });
+
+            if (existingUser) {
+                throw new ConflictException('Email already exists');
+            }
+
             const hash = await bcrypt.hash(dto.password, 10);
 
             return this.prisma.user.create({
@@ -22,7 +30,8 @@ export class AuthService {
                     password: hash,
                 },
             });
-        } catch (error:any) {
+        } catch (error: any) {
+            console.log(error);
             if (
                 error instanceof Prisma.PrismaClientKnownRequestError &&
                 error.code === 'P2002'
@@ -34,9 +43,9 @@ export class AuthService {
         }
     }
 
-    async login(email: string, password: string) {
+    async login(dto: { email: string, password: string }) {
         const user = await this.prisma.user.findUnique({
-            where: { email },
+            where: { email: dto.email },
         });
 
         if (!user) {
@@ -44,7 +53,7 @@ export class AuthService {
         }
 
         const valid = await bcrypt.compare(
-            password,
+            dto.password,
             user.password,
         );
 

@@ -1,18 +1,22 @@
-import { Body, Controller, Delete, Get, Param, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, UseGuards } from '@nestjs/common';
 import { BookmarkService } from './bookmark.service';
 import { ZodValidationPipe } from '../common/pipes/zod-validation.pipe';
 import { createBookmarkSchema } from './bookmark.schema';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { GetUser } from '../common/get-user.decorator';
 
 @Controller('bookmark')
 export class BookmarkController {
     constructor(private readonly service: BookmarkService) { }
 
+    @UseGuards(JwtAuthGuard)
     @Post()
     create(
         @Body(new ZodValidationPipe(createBookmarkSchema))
         body: any,
+        @GetUser('id') userId: string,
     ) {
-        return this.service.create(body);
+        return this.service.create(userId, body);
     }
 
     @Get()

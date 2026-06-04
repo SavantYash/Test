@@ -6,8 +6,14 @@ export class BookmarkService {
 
     constructor(private prisma: PrismaService) { }
 
-    create(data: { title: string, url: string, userId: string }) {
-        return this.prisma.bookmark.create({ data })
+    create(userId: string, data: { title: string, url: string }) {
+        return this.prisma.bookmark.create({
+            data: {
+                title: data.title,
+                url: data.url,
+                userId,
+            },
+        })
     }
 
     findAll() {

@@ -1,15 +1,15 @@
-import { Body, Controller, Delete, Get, Param, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Put, UseGuards } from '@nestjs/common';
 import { BookmarkService } from './bookmark.service';
 import { ZodValidationPipe } from '../common/pipes/zod-validation.pipe';
-import { createBookmarkSchema } from './bookmark.schema';
+import { createBookmarkSchema, updateBookmarkSchema } from './bookmark.schema';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { GetUser } from '../common/get-user.decorator';
 
+@UseGuards(JwtAuthGuard)
 @Controller('bookmark')
 export class BookmarkController {
     constructor(private readonly service: BookmarkService) { }
 
-    @UseGuards(JwtAuthGuard)
     @Post()
     create(
         @Body(new ZodValidationPipe(createBookmarkSchema))
@@ -20,15 +20,17 @@ export class BookmarkController {
     }
 
     @Get()
-    findAll() { return this.service.findAll() }
+    getMyBookMarks(@GetUser('id') userId: string) { return this.service.getMyBookMarks(userId) }
 
     @Get(':id')
-    findOne(@Param('id') id: string) {
-        return this.service.findOne(id);
-    }
+    getBookMarkById(@GetUser('id') userId: string, @Param('id') id: string) { return this.service.getBookMarkById(userId, id) }
 
-    @Delete(':id')
-    remove(@Param('id') id: string) {
-        return this.service.remove(id);
+    @Patch(':id')
+    patchBookMarkById(
+        @GetUser('id') userId: string,
+        @Param('id') id: string,
+        @Body(new ZodValidationPipe(updateBookmarkSchema)) body: any
+    ) {
+        return this.service.patchBookMarkById(userId, id,body)
     }
 }

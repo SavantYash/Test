@@ -1,5 +1,6 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma.service';
+import { ResponseUtil } from '../utils/Response.util';
 
 @Injectable()
 export class BookmarkService {
@@ -16,17 +17,30 @@ export class BookmarkService {
         })
     }
 
-    findAll() {
-        return this.prisma.bookmark.findMany({
-            include: { user: true },
-        })
+    getMyBookMarks(userId: string) {
+        return this.prisma.bookmark.findMany({ where: { userId } })
     }
 
-    findOne(id: string) {
-        return this.prisma.bookmark.findFirst({ where: { id } })
+    async getBookMarkById(userId: string, id: string) {
+        const bookmark = await this.prisma.bookmark.findFirst({
+            where: {
+                id,
+                userId,
+            },
+        });
+
+        if (!bookmark) {
+            throw new NotFoundException('Bookmark not found');
+        }
+
+        return ResponseUtil.success(bookmark, "Bookmark fetched");
     }
 
-    remove(id: string) {
-        return this.prisma.bookmark.delete({ where: { id } })
+    async patchBookMarkById(userId: string, id: string, dto: any) {
+        const bookmark = await this.prisma.bookmark.findUnique({ where: { userId, id } })
+        if (!bookmark) {
+            throw new NotFoundException('Bookmark not found');
+        }
+        return this.prisma.bookmark.update({ where: { id }, data: dto })
     }
 }

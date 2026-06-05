@@ -47,7 +47,8 @@ export class AuthService {
         const user = await this.prisma.user.findUnique({
             where: { email: dto.email },
         });
-
+        console.log('USER:', user);
+        console.log('JWT_SECRET:', process.env.JWT_SECRET);
         if (!user) {
             throw new UnauthorizedException();
         }

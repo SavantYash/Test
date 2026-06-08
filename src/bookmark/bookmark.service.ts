@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma.service';
 import { ResponseUtil } from '../utils/Response.util';
 
@@ -42,5 +42,20 @@ export class BookmarkService {
             throw new NotFoundException('Bookmark not found');
         }
         return this.prisma.bookmark.update({ where: { id }, data: dto })
+    }
+
+    async deleteBookMarkById(userId: string, id: string) {
+        const result = await this.prisma.bookmark.deleteMany({
+            where: {
+                id,
+                userId,
+            },
+        });
+
+        if (result.count === 0) {
+            throw new NotFoundException('Bookmark not found');
+        }
+
+        return ResponseUtil.success('Bookmark removed!');
     }
 }

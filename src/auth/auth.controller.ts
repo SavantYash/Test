@@ -3,6 +3,7 @@ import { ZodValidationPipe } from '../common/pipes/zod-validation.pipe';
 import { registerSchema } from './register.schema';
 import { AuthService } from './auth.service';
 import { loginSchema } from './login.schema';
+import { GetUser } from '../common/get-user.decorator';
 
 @Controller('auth')
 export class AuthController {
@@ -21,4 +22,12 @@ export class AuthController {
         @Body(new ZodValidationPipe(loginSchema))
         dto: any
     ) { return this.authService.login(dto) }
+
+    @Post('refresh')
+    refresh(
+        @Body() body: { refreshToken: string },
+        @GetUser('id') userId: string
+    ) {
+        return this.authService.refresh(body.refreshToken);
+    }
 }

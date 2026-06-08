@@ -31,6 +31,14 @@ export class BookmarkController {
         @Param('id') id: string,
         @Body(new ZodValidationPipe(updateBookmarkSchema)) body: any
     ) {
-        return this.service.patchBookMarkById(userId, id,body)
+        return this.service.patchBookMarkById(userId, id, body)
+    }
+
+    @Delete(':id')
+    deleteBookMarkById(
+        @GetUser('id') userId: string,
+        @Param('id') id: string,
+    ) {
+        return this.service.deleteBookMarkById(userId, id)
     }
 }
